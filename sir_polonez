@@ -1,0 +1,96 @@
+#PROGRAM SIR POLONEZ
+#programul genereaza sirul polonez asociat unei expresii aritmetice -> functia generare_sir
+#       si evalueaza sirul polonez pentru a verifica daca este bine generat -> functia evaluare sir
+#pentru variabile se pot folosi doar litere mici de la a la z(fara diacritice)
+#la input se introduc operatorii si operanzii cu spatiu intre ei ex: a + b  (nu a+b)
+def adaugare_operator_stiva(stiva,op,sir_polonez):
+    operatori = {
+    "+" : 1,
+    "-" : 1,
+    "*" : 2,
+    "/" : 2
+    }
+    #daca stiva e goala adaug direct
+    if len(stiva) == 0:
+        stiva.append(op)
+    #daca am elemente in stiva, trebuie verificata conditia de precedenta
+    else:
+        if stiva[-1] == "(":
+            stiva.append(op)
+        elif operatori[stiva[-1]] >= operatori[op]: ## daca operatorul pe care vreau sa il adaug se supara
+            sir_polonez.append(stiva[-1])
+            stiva.pop()
+            adaugare_operator_stiva(stiva,op,sir_polonez)
+        #daca operatorul nu se supara, adica este mai greu decat cel anterior
+        else:
+            stiva.append(op)
+    #print(stiva)
+    #print(sir_polonez)
+    return stiva, sir_polonez
+
+
+expr = [i for i in input().split(" ")] #input
+
+stiva = []
+sir_polonez = []
+sir_polonez.append(expr[0])
+
+def generare_sir(expr,stiva,sir_polonez,i=1):
+    operatori = {
+    "+" : 1,
+    "-" : 1,
+    "*" : 2,
+    "/" : 2
+    }
+    while i<len(expr):
+        #daca citesc un operand
+        if ord(expr[i]) >= 97 and ord(expr[i]) <=122:
+            sir_polonez.append(expr[i])
+        #daca citesc paranteza deschisa
+        elif expr[i] == "(": ## nu uita paranteza inchisa
+            stiva.append(expr[i])
+        #daca citesc paranteza inchisa
+        elif expr[i] == ")":
+            while stiva[-1] != "(":
+                sir_polonez.append(stiva[-1])
+                stiva.pop()
+            stiva.pop()
+        # daca citesc un operator
+        else:
+            rez = adaugare_operator_stiva(stiva,expr[i],sir_polonez)
+            stiva = rez[0]
+            sir_polonez = rez[1]
+
+        i += 1
+    #la final se goleste stiva
+    while len(stiva)!=0:
+        sir_polonez.append(stiva[-1])
+        stiva.pop()
+    #print(sir_polonez)
+    return sir_polonez
+
+
+print("Sirul polonez generat este:")
+sir_polonez1 = generare_sir(expr,stiva,sir_polonez)
+print(sir_polonez1)
+
+def evaluare_sir(sir_polonez):
+    stiva = []
+    for op in sir_polonez:
+        #daca intalnim un operand
+        if ord(op) >= 97 and ord(op) <=122:
+            stiva.append(op)
+        #daca intalnim un operator
+        else:
+            #la acesti 2 operatori trebuie folosite paranteze
+            if op == "+" or op == "-":
+                stiva[-2] = "(" + stiva[-2] + op + stiva[-1]+ ")"
+                stiva.pop()
+            else:
+                stiva[-2] = stiva[-2] + op + stiva[-1]
+                stiva.pop()
+
+    return stiva[0]
+
+print("Evaluarea sirului polonez:")
+print(evaluare_sir(sir_polonez1))
